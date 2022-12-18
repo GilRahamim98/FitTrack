@@ -5,7 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 
 SplashScreen.preventAutoHideAsync();
 
-const Connect = () => {
+const Connect = ({ navigation }) => {
     const [fontsLoaded] = useFonts({
         'Lato-Regular': require('../assets/fonts/Lato-Regular.ttf'),
     });
@@ -33,8 +33,7 @@ const Connect = () => {
                 <View style={{ marginHorizontal: 32 }}>
                     <TouchableOpacity
                         style={styles.buttonLike}
-                        onPress={() =>
-                            Alert.alert('Sign in')}
+                        onPress={() => navigation.navigate('Login')}
                     >
                         <Text style={styles.textInsideButton}>Sign in</Text>
                     </TouchableOpacity>
