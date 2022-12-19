@@ -31,8 +31,8 @@ const Register = ({ navigation }) => {
     const dispatch = useDispatch();
     const handleSubmit = () => {
         //Add user authentication functionality
-        setEmail(registerForm.emailOrPhone.value)
-        setPassword(registerForm.password.value)
+        dispatch(setEmail(registerForm.emailOrPhone.value))
+        dispatch(setPassword(registerForm.password.value))
         navigation.navigate('Home')
 
     };
