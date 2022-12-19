@@ -41,8 +41,7 @@ const Connect = ({ navigation }) => {
                 <View style={{ marginHorizontal: 32, }}>
                     <TouchableOpacity
                         style={styles.buttonLike}
-                        onPress={() =>
-                            Alert.alert('Sign up')}
+                        onPress={() => navigation.navigate('Register')}
                     >
                         <Text style={styles.textInsideButton}>Sign up</Text>
                     </TouchableOpacity>
