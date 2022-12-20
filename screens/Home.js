@@ -25,6 +25,10 @@ const events = [
 
 const Home = ({ navigation }) => {
     const { id, email, password } = useSelector(state => state.userReducer);
+    const addWorkoutEvent = (workoutEvent) => {
+        events.push(workoutEvent)
+
+    }
 
     return (
         <>
@@ -43,7 +47,7 @@ const Home = ({ navigation }) => {
 
             </View>
 
-            <Calendar events={events} navigation={navigation} />
+            <Calendar events={events} navigation={navigation} addWorkoutEvent={addWorkoutEvent} />
 
         </>
     )

@@ -87,7 +87,11 @@ export default class EventCalendar extends React.Component {
                         <Image source={require('../assets/back.png')} style={this.styles.arrow} />
                     </TouchableOpacity>
                     <Text style={this.styles.headerText}>{this.state.date.format(formatHeader || 'DD MMMM YYYY')}</Text>
-                    <TouchableOpacity >
+                    <TouchableOpacity onPress={() => this.props.navigation.navigate('AddWorkout', {
+                        date: this.state.date.format(formatHeader || 'DD MMMM YYYY'),
+                    }, {
+                        addWorkoutEvent: this.props.addWorkoutEvent
+                    })}>
                         <Text style={this.styles.headerText}>Add Workout</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => this._goToPage(this.state.index + 1)}>
