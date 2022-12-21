@@ -1,4 +1,5 @@
-import { View, Text, Dimensions, StyleSheet, TouchableOpacity, Image } from "react-native"
+import { useEffect, useState } from "react";
+import { View, Text, Modal, StyleSheet, TouchableOpacity, Pressable, Image } from "react-native"
 import { useSelector, useDispatch } from 'react-redux';
 import Calendar from '../components/Calendar';
 
@@ -20,19 +21,40 @@ const events = [
     { start: '2017-09-09 00:10:00', end: '2017-09-09 01:45:00', title: 'Dr. Mariana Joseph', summary: '3412 Piedmont Rd NE, GA 3032' }
 ]
 
-
-
-
-const Home = ({ navigation }) => {
+const Home = ({ route, navigation }) => {
     const { id, email, password } = useSelector(state => state.userReducer);
-    const addWorkoutEvent = (workoutEvent) => {
-        events.push(workoutEvent)
+    const [modalVisible, setModalVisible] = useState(false);
+    useEffect(() => {
+        if (route.params?.workoutEvent) {
+            events.push(route.params?.workoutEvent)
+            setModalVisible(true)
+            setTimeout(() => {
+                setModalVisible(false)
+            }, 1000)
 
-    }
+        }
+    }, [route.params?.workoutEvent])
+
 
     return (
         <>
             <View style={styles.container}>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => {
+                        setModalVisible(!modalVisible);
+                    }}
+                >
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <Text style={styles.modalText}>Saved!</Text>
+
+                        </View>
+                    </View>
+                </Modal>
+
                 <TouchableOpacity style={{ flex: 1 }}>
                     <Image source={require('../assets/avatar.webp')} style={styles.tinyLogo} />
                 </TouchableOpacity>
@@ -47,7 +69,7 @@ const Home = ({ navigation }) => {
 
             </View>
 
-            <Calendar events={events} navigation={navigation} addWorkoutEvent={addWorkoutEvent} />
+            <Calendar events={events} navigation={navigation} />
 
         </>
     )
@@ -87,6 +109,37 @@ const styles = StyleSheet.create({
         width: 120,
         height: 120,
         borderRadius: 100
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 22
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+    },
+    textStyle: {
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center"
+    },
+
+    modalText: {
+        marginBottom: 15,
+        textAlign: "center"
     }
 })
 

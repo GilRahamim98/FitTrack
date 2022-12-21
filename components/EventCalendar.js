@@ -89,8 +89,7 @@ export default class EventCalendar extends React.Component {
                     <Text style={this.styles.headerText}>{this.state.date.format(formatHeader || 'DD MMMM YYYY')}</Text>
                     <TouchableOpacity onPress={() => this.props.navigation.navigate('AddWorkout', {
                         date: this.state.date.format(formatHeader || 'DD MMMM YYYY'),
-                    }, {
-                        addWorkoutEvent: this.props.addWorkoutEvent
+
                     })}>
                         <Text style={this.styles.headerText}>Add Workout</Text>
                     </TouchableOpacity>

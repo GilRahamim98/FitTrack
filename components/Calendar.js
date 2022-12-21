@@ -8,7 +8,7 @@ let { width, height } = Dimensions.get('window')
 const calendarHeight = 2480
 const leftMargin = 50 - 1
 
-const Calendar = ({ events, addWorkoutEvent, navigation }) => {
+const Calendar = ({ events, navigation }) => {
     const { id, email, password } = useSelector(state => state.userReducer);
 
     return (
@@ -20,7 +20,9 @@ const Calendar = ({ events, addWorkoutEvent, navigation }) => {
             })}
             style={styles}
             navigation={navigation}
-            addWorkoutEvent={addWorkoutEvent}
+            format24h
+
+
         />
     )
 }

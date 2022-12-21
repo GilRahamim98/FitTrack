@@ -2,18 +2,18 @@ import { useState } from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Button } from "react-native";
 import { useSelector, useDispatch } from 'react-redux';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import validations from "../common/validations";
 
 
-const AddWorkout = ({ route, addWorkoutEvent, navigation }) => {
+const AddWorkout = ({ route, navigation }) => {
     const { id, email, password } = useSelector(state => state.userReducer);
     const { date } = route.params;
     const [isStartTimePickerVisible, setStartTimePickerVisibility] = useState(false);
     const [isEndTimePickerVisible, setEndTimePickerVisibility] = useState(false);
-    console.log(route)
 
     const [workoutTime, setWorkoutTime] = useState({
-        start: "Choose Starting time",
-        end: "Choose Ending time",
+        start: "Starting time",
+        end: "Ending time",
         date: ""
     })
 
@@ -46,13 +46,22 @@ const AddWorkout = ({ route, addWorkoutEvent, navigation }) => {
                 value: ""
             },
             weight: {
-                value: ""
+                value: "",
+                validations: {
+                    type: "number"
+                }
             },
             sets: {
-                value: ""
+                value: "",
+                validations: {
+                    type: "number"
+                }
             },
             reps: {
-                value: ""
+                value: "",
+                validations: {
+                    type: "number"
+                }
             },
         }
     )
@@ -73,17 +82,15 @@ const AddWorkout = ({ route, addWorkoutEvent, navigation }) => {
                     value={exercise.name.value}
                     selectionColor={'#FED049'}
                     onChangeText={(text) => setExerciseData("name", text)}
-
                 />
-                <View style={{ flexDirection: "row" }}>
-
+                <View style={{ flexDirection: "row", marginLeft: "8%" }}>
                     <TextInput
                         style={styles.exerciseInput}
                         placeholder="Weight"
                         value={exercise.weight.value}
                         selectionColor={'#FED049'}
                         onChangeText={(text) => setExerciseData("weight", text)}
-
+                        keyboardType='numeric'
                     />
                     <TextInput
                         style={styles.exerciseInput}
@@ -91,7 +98,7 @@ const AddWorkout = ({ route, addWorkoutEvent, navigation }) => {
                         value={exercise.sets.value}
                         selectionColor={'#FED049'}
                         onChangeText={(text) => setExerciseData("sets", text)}
-
+                        keyboardType='numeric'
                     />
                     <TextInput
                         style={styles.exerciseInput}
@@ -99,6 +106,7 @@ const AddWorkout = ({ route, addWorkoutEvent, navigation }) => {
                         value={exercise.reps.value}
                         selectionColor={'#FED049'}
                         onChangeText={(text) => setExerciseData("reps", text)}
+                        keyboardType='numeric'
                     />
                     <TouchableOpacity
                         style={styles.buttonAddLike}
@@ -106,11 +114,8 @@ const AddWorkout = ({ route, addWorkoutEvent, navigation }) => {
                     >
                         <Text style={styles.textInsideButton}>Add</Text>
                     </TouchableOpacity>
-
-
                 </View>
             </View>
-
         )
     }
     const addExercise = () => {
@@ -125,10 +130,27 @@ const AddWorkout = ({ route, addWorkoutEvent, navigation }) => {
             exercise[field].value = ""
         }
         setExercisesArr(prev => [...prev, exerciseToAdd])
-
-
     }
+    const editExercise = (exe, index) => {
+        for (const field of Object.keys(exe)) {
+            exercise[field].value = exe[field]
+        }
+        deleteExercise(index)
+    }
+
+    const deleteExercise = (index) => {
+        const newArr = [...exercisesArr]
+        newArr.splice(index, 1)
+        setExercisesArr([...newArr])
+    }
+
+
     const saveWorkout = () => {
+        if (!validations.containsOnlyNumbers(workoutTime.start) || !validations.containsOnlyNumbers(workoutTime.end)) {
+            console.log("not good");
+            return
+
+        }
         const savedDate = new Date(Date.parse(date))
         const year = savedDate.getFullYear();
         const month = String(savedDate.getMonth() + 1).padStart(2, "0");
@@ -138,11 +160,14 @@ const AddWorkout = ({ route, addWorkoutEvent, navigation }) => {
             start: `${finalDate} ${workoutTime.start}`,
             end: `${finalDate} ${workoutTime.end}`,
             title: "Gym Workout",
-            summary: `${exercisesArr.length} exercises was done!`
+            summary: `${exercisesArr.length} exercises was done!`,
+            exercises: [...exercisesArr]
         }
-        addWorkoutEvent(finalWorkout)
-        navigation.navigate("Home")
-
+        navigation.navigate({
+            name: "Home",
+            params: { workoutEvent: finalWorkout },
+            merge: true
+        })
     }
 
 
@@ -150,7 +175,8 @@ const AddWorkout = ({ route, addWorkoutEvent, navigation }) => {
         <View style={styles.container}>
             <Text>{date}</Text>
 
-            <View style={{ flexDirection: "row" }}>
+            <View style={{ flexDirection: "row", marginVertical: 80 }}>
+                <Text></Text>
                 <TouchableOpacity
                     style={styles.buttonTimeLike}
                     onPress={showStartPicker}
@@ -162,7 +188,8 @@ const AddWorkout = ({ route, addWorkoutEvent, navigation }) => {
                     mode="time"
                     onConfirm={(date) => handleConfirm(date, "start")}
                     onCancel={hideStartPicker}
-                    is24Hour />
+                    is24Hour
+                />
                 <TouchableOpacity
                     style={styles.buttonTimeLike}
                     onPress={showEndPicker}
@@ -174,14 +201,24 @@ const AddWorkout = ({ route, addWorkoutEvent, navigation }) => {
                     mode="time"
                     onConfirm={(date) => handleConfirm(date, "end")}
                     onCancel={hideEndPicker}
-                    is24Hour />
+                    is24Hour
+                />
             </View>
 
             {createExercise()}
             <View>
                 {exercisesArr.map((exe, index) => {
                     return (
-                        <Text key={`${exe.name} - ${index}`}>{exe.name} : {exe.weight} * {exe.sets} * {exe.reps}</Text>
+                        <View key={`${exe.name} - ${index}`} style={{ flexDirection: "row", marginVertical: 5 }}>
+                            <Text style={styles.exerciseText} onPress={() => editExercise(exe, index)}>{exe.name} : {exe.weight} * {exe.sets} * {exe.reps}</Text>
+                            <TouchableOpacity
+                                style={styles.buttonEditLike}
+                                onPress={() => deleteExercise(index)}
+
+                            >
+                                <Text style={styles.textInsideButton}>Delete</Text>
+                            </TouchableOpacity>
+                        </View>
                     )
                 }
 
@@ -191,7 +228,7 @@ const AddWorkout = ({ route, addWorkoutEvent, navigation }) => {
             </View>
 
 
-            <View style={{ flexDirection: "row" }}>
+            <View style={{ flexDirection: "row", marginVertical: 80 }}>
                 <TouchableOpacity
                     style={styles.buttonLike}
                     onPress={() => navigation.navigate("Home")}
@@ -217,6 +254,21 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: '#F1F6F5'
+    },
+    exerciseText: {
+        fontSize: 30,
+        fontWeight: "bold"
+
+    },
+    buttonEditLike: {
+        justifyContent: 'center',
+        backgroundColor: '#FED049',
+        paddingHorizontal: 10,
+        height: 40,
+        width: 100,
+        borderRadius: 30,
+        alignItems: 'center',
+        marginLeft: 10
     },
     input: {
         width: '80%',
@@ -254,13 +306,13 @@ const styles = StyleSheet.create({
 
     },
     buttonAddLike: {
-        marginTop: 16,
+        marginVertical: 10,
         justifyContent: 'center',
         backgroundColor: '#FED049',
-        padding: 8,
-        height: 50,
+        paddingHorizontal: 10,
+        height: 40,
         width: 100,
-        borderRadius: 20,
+        borderRadius: 30,
         alignItems: 'center',
         marginLeft: 10
     },
@@ -270,10 +322,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#FED049',
         padding: 8,
         height: 50,
-        width: 200,
+        width: 150,
         borderRadius: 20,
         alignItems: 'center',
-        marginLeft: 10
+        marginHorizontal: 30
     },
     buttonTimeLike: {
         marginTop: 16,
@@ -281,7 +333,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#FED049',
         padding: 8,
         height: 50,
-        width: 250,
+        width: 150,
         borderRadius: 20,
         alignItems: 'center',
         marginLeft: 10
