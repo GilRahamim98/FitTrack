@@ -8,6 +8,7 @@ import Login from './screens/Login';
 import Home from './screens/Home';
 import Register from './screens/Register';
 import Workout from './screens/Workout';
+import AddWorkout from './screens/AddWorkout';
 
 
 const Stack = createStackNavigator();
@@ -32,6 +33,8 @@ const App = () => {
         <Stack.Screen name='Register' component={Register} />
         <Stack.Screen name='Home' component={Home} />
         <Stack.Screen name='Workout' component={Workout} />
+        <Stack.Screen name='AddWorkout' component={AddWorkout} />
+
 
 
       </Stack.Navigator>

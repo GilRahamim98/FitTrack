@@ -19,6 +19,10 @@ const Calendar = ({ events, navigation }) => {
                 workout: e
             })}
             style={styles}
+            navigation={navigation}
+            format24h
+
+
         />
     )
 }
