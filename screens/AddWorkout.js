@@ -10,6 +10,21 @@ const AddWorkout = ({ route, navigation }) => {
     const { date } = route.params;
     const [isStartTimePickerVisible, setStartTimePickerVisibility] = useState(false);
     const [isEndTimePickerVisible, setEndTimePickerVisibility] = useState(false);
+    const [validForm, setValidForm] = useState({
+        validExercises: {
+            error: "*Weight, Sets, and Reps need to be numbers only",
+            valid: true
+        },
+        vaildHours: {
+            error: "*The Ending Time must be after the Starting time",
+            valid: true
+        },
+        validLength: {
+            error: "*Enter at least one exercise to continue",
+            valid: true
+        }
+
+    })
 
     const [workoutTime, setWorkoutTime] = useState({
         start: "Starting time",
@@ -39,6 +54,7 @@ const AddWorkout = ({ route, navigation }) => {
         currentInput[type] = `${hour}:${minutes}:00`
         setWorkoutTime({ ...workoutTime })
         type === "start" ? hideStartPicker() : hideEndPicker();
+        type === "end" ? checkHours() : null
     };
     const [exercise, setExercise] = useState(
         {
@@ -48,19 +64,19 @@ const AddWorkout = ({ route, navigation }) => {
             weight: {
                 value: "",
                 validations: {
-                    type: "number"
+                    type: "containsOnlyNumbers"
                 }
             },
             sets: {
                 value: "",
                 validations: {
-                    type: "number"
+                    type: "containsOnlyNumbers"
                 }
             },
             reps: {
                 value: "",
                 validations: {
-                    type: "number"
+                    type: "containsOnlyNumbers"
                 }
             },
         }
@@ -72,7 +88,6 @@ const AddWorkout = ({ route, navigation }) => {
         currentInput.value = value
         setExercise({ ...exercise })
     }
-
     const createExercise = () => {
         return (
             <View>
@@ -115,6 +130,9 @@ const AddWorkout = ({ route, navigation }) => {
                         <Text style={styles.textInsideButton}>Add</Text>
                     </TouchableOpacity>
                 </View>
+                <Text style={{ marginLeft: "15%", color: "red", fontWeight: "bold" }}>{validForm.validExercises.valid ? "" : validForm.validExercises.error}</Text>
+                <Text style={{ marginLeft: "15%", marginVertical: 5, color: "red", fontWeight: "bold" }}>{validForm.validLength.valid ? "" : validForm.validLength.error}</Text>
+
             </View>
         )
     }
@@ -125,11 +143,35 @@ const AddWorkout = ({ route, navigation }) => {
             sets: "",
             reps: ""
         }
-        for (const field of Object.keys(exerciseToAdd)) {
-            exerciseToAdd[field] = exercise[field].value
-            exercise[field].value = ""
+        let valid = false
+        for (const field of Object.keys(exercise)) {
+            if ("validations" in exercise[field]) {
+                if (validations[exercise[field].validations.type](exercise[field].value)) {
+                    if (!validForm.validExercises?.valid) {
+                        const newValidForm = validForm
+                        newValidForm.validExercises.valid = true
+                        setValidForm({ ...newValidForm })
+                    }
+                    valid = true
+                } else {
+                    const newValidForm = validForm
+                    newValidForm.validExercises.valid = false
+                    setValidForm({ ...newValidForm })
+                    valid = false
+                    return
+                }
+            }
         }
-        setExercisesArr(prev => [...prev, exerciseToAdd])
+        if (valid) {
+            for (const field of Object.keys(exercise)) {
+                exerciseToAdd[field] = exercise[field].value
+                exercise[field].value = ""
+            }
+            setExercisesArr(prev => [...prev, exerciseToAdd])
+
+        }
+
+
     }
     const editExercise = (exe, index) => {
         for (const field of Object.keys(exe)) {
@@ -143,31 +185,71 @@ const AddWorkout = ({ route, navigation }) => {
         newArr.splice(index, 1)
         setExercisesArr([...newArr])
     }
+    const checkHours = () => {
+        if (workoutTime.start !== "Starting time" && workoutTime.end !== "Ending time") {
+            if (validations.checkIfTimeIsBefore(workoutTime.start, workoutTime.end)) {
+                if (!validForm.vaildHours?.valid) {
+                    const newValidForm = validForm
+                    newValidForm.vaildHours.valid = true
+                    setValidForm({ ...newValidForm })
+                }
+            } else {
+                const newValidForm = validForm
+                newValidForm.vaildHours.valid = false
+                setValidForm({ ...newValidForm })
+            }
+        } else {
+            const newValidForm = validForm
+            newValidForm.vaildHours.valid = false
+            setValidForm({ ...newValidForm })
+        }
+    }
+    const checkExercisesArrLength = () => {
+        if (exercisesArr.length >= 1) {
+            const newValidForm = validForm
+            newValidForm.validLength.valid = true
+            setValidForm({ ...newValidForm })
+        } else {
+            const newValidForm = validForm
+            newValidForm.validLength.valid = false
+            setValidForm({ ...newValidForm })
+        }
+    }
 
 
     const saveWorkout = () => {
-        if (!validations.containsOnlyNumbers(workoutTime.start) || !validations.containsOnlyNumbers(workoutTime.end)) {
-            console.log("not good");
-            return
+        let valid = false
+        checkHours()
+        checkExercisesArrLength()
+        for (const field of Object.keys(validForm)) {
+            console.log(validForm[field].valid);
+            if (!validForm[field].valid) {
+                valid = false
+                return
+            }
+            valid = true
+        }
+        if (valid) {
+            const savedDate = new Date(Date.parse(date))
+            const year = savedDate.getFullYear();
+            const month = String(savedDate.getMonth() + 1).padStart(2, "0");
+            const day = String(savedDate.getDate()).padStart(2, "0");
+            const finalDate = `${year}-${month}-${day}`
+            const finalWorkout = {
+                start: `${finalDate} ${workoutTime.start}`,
+                end: `${finalDate} ${workoutTime.end}`,
+                title: "Gym Workout",
+                summary: `${exercisesArr.length} exercises was done!`,
+                exercises: [...exercisesArr]
+            }
+            navigation.navigate({
+                name: "Home",
+                params: { workoutEvent: finalWorkout },
+                merge: true
+            })
+        }
 
-        }
-        const savedDate = new Date(Date.parse(date))
-        const year = savedDate.getFullYear();
-        const month = String(savedDate.getMonth() + 1).padStart(2, "0");
-        const day = String(savedDate.getDate()).padStart(2, "0");
-        const finalDate = `${year}-${month}-${day}`
-        const finalWorkout = {
-            start: `${finalDate} ${workoutTime.start}`,
-            end: `${finalDate} ${workoutTime.end}`,
-            title: "Gym Workout",
-            summary: `${exercisesArr.length} exercises was done!`,
-            exercises: [...exercisesArr]
-        }
-        navigation.navigate({
-            name: "Home",
-            params: { workoutEvent: finalWorkout },
-            merge: true
-        })
+
     }
 
 
@@ -175,8 +257,7 @@ const AddWorkout = ({ route, navigation }) => {
         <View style={styles.container}>
             <Text>{date}</Text>
 
-            <View style={{ flexDirection: "row", marginVertical: 80 }}>
-                <Text></Text>
+            <View style={{ flexDirection: "row", marginTop: 80 }}>
                 <TouchableOpacity
                     style={styles.buttonTimeLike}
                     onPress={showStartPicker}
@@ -204,6 +285,9 @@ const AddWorkout = ({ route, navigation }) => {
                     is24Hour
                 />
             </View>
+            <Text style={{ color: "red", fontWeight: "bold" }}>{validForm.vaildHours.valid ? "" : validForm.vaildHours.error}</Text>
+
+
 
             {createExercise()}
             <View>
@@ -223,11 +307,7 @@ const AddWorkout = ({ route, navigation }) => {
                 }
 
                 )}
-
-
             </View>
-
-
             <View style={{ flexDirection: "row", marginVertical: 80 }}>
                 <TouchableOpacity
                     style={styles.buttonLike}
