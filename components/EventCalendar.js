@@ -36,6 +36,7 @@ export default class EventCalendar extends React.Component {
 
     _getItem(events, index) {
         const date = moment(this.props.initDate).add(index - this.props.size, 'days')
+
         return _.filter(events, event => {
             const eventStartTime = moment(event.start)
             return eventStartTime >= date.clone().startOf('day') &&
@@ -89,7 +90,6 @@ export default class EventCalendar extends React.Component {
                     <Text style={this.styles.headerText}>{this.state.date.format(formatHeader || 'DD MMMM YYYY')}</Text>
                     <TouchableOpacity onPress={() => this.props.navigation.navigate('AddWorkout', {
                         date: this.state.date.format(formatHeader || 'DD MMMM YYYY'),
-
                     })}>
                         <Text style={this.styles.headerText}>Add Workout</Text>
                     </TouchableOpacity>
@@ -118,6 +118,7 @@ export default class EventCalendar extends React.Component {
                     }}
                     {...virtualizedListProps}
                 />
+
             </View>
 
         )
