@@ -5,33 +5,37 @@ import Calendar from '../components/Calendar';
 
 
 
-const events = []
 
 const Home = ({ route, navigation }) => {
     const { id, email, password } = useSelector(state => state.userReducer);
+    const [events, setEvents] = useState([])
     const [modalVisible, setModalVisible] = useState(false);
     useEffect(() => {
         if (route.params?.edit === true) {
             const editIndex = events.find(workout => workout.id === route.params?.editId)
             editIndex ? events.splice(editIndex, 1) : null
-            events.push(route.params?.workoutEvent)
+            setEvents([...events, route.params?.workoutEvent])
+            // events.push(route.params?.workoutEvent)
             setModalVisible(true)
             setTimeout(() => {
                 setModalVisible(false)
             }, 1000)
         } else if (route.params?.workoutEvent) {
-            events.push(route.params?.workoutEvent)
+            setEvents([...events, route.params?.workoutEvent])
+            // events.push(route.params?.workoutEvent)
             setModalVisible(true)
             setTimeout(() => {
                 setModalVisible(false)
             }, 1000)
         }
-        // else if (route.params?.deleteWorkout) {
-        //     const editIndex = events.find(workout => workout.id === route.params?.deleteWorkout)
-        //     editIndex ? events.splice(editIndex, 1) : null
-        // }
+        else if (route.params?.deleteWorkout) {
+            const deleteIndex = events.find(workout => workout.id === route.params?.deleteWorkout)
+            deleteIndex ? events.splice(deleteIndex, 1) : null
+            setEvents([...events])
 
-    }, [route.params?.workoutEvent])
+        }
+
+    }, [route.params?.workoutEvent, route.params?.deleteWorkout])
 
 
     return (
