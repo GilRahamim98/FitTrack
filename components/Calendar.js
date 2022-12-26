@@ -15,8 +15,8 @@ const Calendar = ({ events, navigation }) => {
         <EventCalendar
             events={events}
             width={width}
-            eventTapped={(e) => navigation.navigate('Workout', {
-                workout: e
+            eventTapped={e => navigation.navigate('Workout', {
+                workout: e,
             })}
             style={styles}
             navigation={navigation}

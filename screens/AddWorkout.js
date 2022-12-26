@@ -3,11 +3,13 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, Button } from "rea
 import { useSelector, useDispatch } from 'react-redux';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import validations from "../common/validations";
+import uuid from 'react-native-uuid';
+
 
 
 const AddWorkout = ({ route, navigation }) => {
     const { id, email, password } = useSelector(state => state.userReducer);
-    const { date } = route.params;
+    const { date, editWorkout } = route.params;
     const [isStartTimePickerVisible, setStartTimePickerVisibility] = useState(false);
     const [isEndTimePickerVisible, setEndTimePickerVisibility] = useState(false);
     const [validForm, setValidForm] = useState({
@@ -27,8 +29,8 @@ const AddWorkout = ({ route, navigation }) => {
     })
 
     const [workoutTime, setWorkoutTime] = useState({
-        start: "Starting time",
-        end: "Ending time",
+        start: editWorkout?.start.split(" ")[1] || "Starting time",
+        end: editWorkout?.end.split(" ")[1] || "Ending time",
         date: ""
     })
 
@@ -82,7 +84,7 @@ const AddWorkout = ({ route, navigation }) => {
         }
     )
 
-    const [exercisesArr, setExercisesArr] = useState([])
+    const [exercisesArr, setExercisesArr] = useState(editWorkout?.exercises || [])
     const setExerciseData = (name, value) => {
         const currentInput = exercise[name]
         currentInput.value = value
@@ -222,7 +224,6 @@ const AddWorkout = ({ route, navigation }) => {
         checkHours()
         checkExercisesArrLength()
         for (const field of Object.keys(validForm)) {
-            console.log(validForm[field].valid);
             if (!validForm[field].valid) {
                 valid = false
                 return
@@ -236,17 +237,25 @@ const AddWorkout = ({ route, navigation }) => {
             const day = String(savedDate.getDate()).padStart(2, "0");
             const finalDate = `${year}-${month}-${day}`
             const finalWorkout = {
+                id: uuid.v4(),
                 start: `${finalDate} ${workoutTime.start}`,
                 end: `${finalDate} ${workoutTime.end}`,
                 title: "Gym Workout",
                 summary: `${exercisesArr.length} exercises was done!`,
                 exercises: [...exercisesArr]
             }
-            navigation.navigate({
-                name: "Home",
-                params: { workoutEvent: finalWorkout },
-                merge: true
-            })
+            editWorkout ?
+                navigation.navigate({
+                    name: "Home",
+                    params: { workoutEvent: finalWorkout, edit: true, editId: editWorkout?.id },
+                    merge: true
+                })
+                :
+                navigation.navigate({
+                    name: "Home",
+                    params: { workoutEvent: finalWorkout, edit: false },
+                    merge: true
+                })
         }
 
 

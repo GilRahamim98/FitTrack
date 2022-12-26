@@ -5,35 +5,37 @@ import Calendar from '../components/Calendar';
 
 
 
-const events = [
-    { start: '2022-12-19 00:30:00', end: '2022-12-19 01:30:00', title: 'Dr. Mariana Joseph', summary: '3412 Piedmont Rd NE, GA 3032' },
-    { start: '2022-12-19 18:30:00', end: '2022-12-19 18:45:00', title: 'Momo', summary: 'Papa' },
-    { start: '2022-12-19 01:30:00', end: '2022-12-19 02:20:00', title: 'Dr. Mariana Joseph', summary: '3412 Piedmont Rd NE, GA 3032' },
-    { start: '2022-12-19 04:10:00', end: '2022-12-19 04:40:00', title: 'Dr. Mariana Joseph', summary: '3412 Piedmont Rd NE, GA 3032' },
-    { start: '2022-12-19 01:05:00', end: '2022-12-19 01:45:00', title: 'Dr. Mariana Joseph', summary: '3412 Piedmont Rd NE, GA 3032' },
-    { start: '2022-12-19 14:30:00', end: '2022-12-19 16:30:00', title: 'Dr. Mariana Joseph', summary: '3412 Piedmont Rd NE, GA 3032' },
-    { start: '2017-09-08 01:20:00', end: '2017-09-08 02:20:00', title: 'Dr. Mariana Joseph', summary: '3412 Piedmont Rd NE, GA 3032' },
-    { start: '2017-09-08 04:10:00', end: '2017-09-08 04:40:00', title: 'Dr. Mariana Joseph', summary: '3412 Piedmont Rd NE, GA 3032' },
-    { start: '2017-09-08 00:45:00', end: '2017-09-08 01:45:00', title: 'Dr. Mariana Joseph', summary: '3412 Piedmont Rd NE, GA 3032' },
-    { start: '2017-09-08 11:30:00', end: '2017-09-08 12:30:00', title: 'Dr. Mariana Joseph', summary: '3412 Piedmont Rd NE, GA 3032' },
-    { start: '2017-09-09 01:30:00', end: '2017-09-09 02:00:00', title: 'Dr. Mariana Joseph', summary: '3412 Piedmont Rd NE, GA 3032' },
-    { start: '2017-09-09 03:10:00', end: '2017-09-09 03:40:00', title: 'Dr. Mariana Joseph', summary: '3412 Piedmont Rd NE, GA 3032' },
-    { start: '2017-09-09 00:10:00', end: '2017-09-09 01:45:00', title: 'Dr. Mariana Joseph', summary: '3412 Piedmont Rd NE, GA 3032' }
-]
 
 const Home = ({ route, navigation }) => {
     const { id, email, password } = useSelector(state => state.userReducer);
+    const [events, setEvents] = useState([])
     const [modalVisible, setModalVisible] = useState(false);
     useEffect(() => {
-        if (route.params?.workoutEvent) {
-            events.push(route.params?.workoutEvent)
+        if (route.params?.edit === true) {
+            const editIndex = events.find(workout => workout.id === route.params?.editId)
+            editIndex ? events.splice(editIndex, 1) : null
+            setEvents([...events, route.params?.workoutEvent])
+            // events.push(route.params?.workoutEvent)
             setModalVisible(true)
             setTimeout(() => {
                 setModalVisible(false)
             }, 1000)
+        } else if (route.params?.workoutEvent) {
+            setEvents([...events, route.params?.workoutEvent])
+            // events.push(route.params?.workoutEvent)
+            setModalVisible(true)
+            setTimeout(() => {
+                setModalVisible(false)
+            }, 1000)
+        }
+        else if (route.params?.deleteWorkout) {
+            const deleteIndex = events.find(workout => workout.id === route.params?.deleteWorkout)
+            deleteIndex ? events.splice(deleteIndex, 1) : null
+            setEvents([...events])
 
         }
-    }, [route.params?.workoutEvent])
+
+    }, [route.params?.workoutEvent, route.params?.deleteWorkout])
 
 
     return (
